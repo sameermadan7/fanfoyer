@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FanFoyer — Live Hub (Interactive Homepage)</title>
+<style>
+  :root{
+    --bg1:#05030a;
+    --bg2:#12031f;
+    --accent1:#ff4db6;
+    --accent2:#9b6bff;
+    --muted:#cbd5e1;
+    --glass: rgba(255,255,255,0.04);
+    --card-bg: rgba(255,255,255,0.02);
+    --wordmark-glow: 0 6px 30px rgba(255,77,182,0.22), 0 2px 8px rgba(155,107,255,0.08);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:
+      radial-gradient(900px 500px at 10% 10%, rgba(155,107,255,0.06), transparent 8%),
+      linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+    color:#fff;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    min-height:100vh;
+  }
+
+  /* animated gradient overlay */
+  .animated-bg{
+    position:fixed;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;
+    background: radial-gradient(circle at 10% 20%, rgba(255,77,182,0.06), transparent 8%),
+                radial-gradient(circle at 90% 80%, rgba(155,107,255,0.04), transparent 8%);
+    animation: floatBG 12s linear infinite;
+    filter: blur(30px) saturate(120%);
+  }
+  @keyframes floatBG{
+    0%{transform:translateY(0) scale(1)}
+    50%{transform:translateY(18px) scale(1.02)}
+    100%{transform:translateY(0) scale(1)}
+  }
+
+  /* fixed top nav */
+  header{
+    position:fixed;
+    left:0;right:0;top:0;
+    height:76px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 34px;
+    backdrop-filter: blur(6px);
+    background: linear-gradient(180deg, rgba(10,8,12,0.6), rgba(10,8,12,0.35));
+    border-bottom:1px solid rgba(255,255,255,0.03);
+    z-index:50;
+  }
+  .brand{display:flex;align-items:center;gap:14px;z-index:60}
+  .logo-ff{
+    width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:#120518;font-size:18px;box-shadow:var(--wordmark-glow);
+  }
+  .wordmark{
+    font-weight:900;font-size:20px;line-height:1;color:transparent;
+    background:linear-gradient(90deg,var(--accent1),var(--accent2));
+    -webkit-background-clip:text;background-clip:text;text-shadow:var(--wordmark-glow);
+  }
+  .subtitle{font-size:12px;color:var(--muted);margin-top:4px}
+
+  .topnav{display:flex;gap:10px;align-items:center;margin-left:18px}
+  .nav-item{
+    display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:700;font-size:13px;color:rgba(255,255,255,0.9);
+    transition:all .18s ease;
+  }
+  .nav-item .icon{font-size:16px;opacity:0.95}
+  .nav-item.active{background:linear-gradient(90deg, rgba(255,77,182,0.08), rgba(155,107,255,0.06));box-shadow:0 8px 30px rgba(155,107,255,0.04)}
+
+  .controls{display:flex;gap:10px;align-items:center}
+  .btn{padding:8px 14px;border-radius:999px;border:0;background:transparent;color:#fff;cursor:pointer;font-weight:700}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04)}
+  .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));box-shadow:0 8px 28px rgba(155,107,255,0.12);color:#120518}
+
+  /* layout */
+  main{display:flex;gap:20px;padding:100px 34px 60px 34px;align-items:flex-start;z-index:40;position:relative}
+  .content{flex:1;display:flex;flex-direction:column;gap:20px}
+  .right{width:360px;min-width:260px}
+
+  /* hero */
+  .hero-banner{display:flex;gap:18px;align-items:center;padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+  .hero-info h1{margin:0;font-size:28px}
+  .hero-info p{color:var(--muted);margin:8px 0 0 0}
+  .hero-cta{display:flex;gap:10px;align-items:center;margin-top:10px}
+
+  .big-live{width:420px;height:220px;border-radius:12px;background:linear-gradient(180deg,#200621,#120219);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px;position:relative;border:1px solid rgba(255,255,255,0.03);box-shadow:0 20px 60px rgba(155,107,255,0.06)}
+  .big-live .live-badge{position:absolute;left:12px;top:12px;background:linear-gradient(90deg,#ff616f,#ff4db6);padding:8px 12px;border-radius:999px;font-weight:800}
+  .big-live .title{font-weight:900;font-size:20px}
+  .big-live .meta{color:var(--muted);margin-top:6px}
+
+  /* creators strip */
+  .creators-strip{display:flex;gap:12px;overflow:auto;padding:8px 0 12px 0;margin-top:12px}
+  .creator-card{min-width:160px;height:120px;border-radius:12px;background:linear-gradient(180deg,#120018,#0a0410);padding:12px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:transform .18s}
+  .creator-card:hover{transform:translateY(-6px)}
+  .creator-avatar{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#120518}
+
+  /* grid of live rooms */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .room{border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);overflow:hidden;position:relative;box-shadow:0 14px 36px rgba(0,0,0,0.5)}
+  .room .thumb{height:160px;border-radius:10px;background:linear-gradient(180deg,#0f0710,#0a0410);display:flex;align-items:flex-end;padding:12px;color:var(--muted);font-weight:800}
+  .room .info{padding:12px;display:flex;justify-content:space-between;align-items:center}
+  .room .live-tag{position:absolute;left:12px;top:12px;background:linear-gradient(90deg,#ff616f,#ff4db6);padding:6px 8px;border-radius:999px;font-weight:800;font-size:12px}
+
+  /* sidebar */
+  .panel{padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));margin-bottom:12px}
+  .small{font-size:13px;color:var(--muted)}
+  .stat{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+
+  /* chat widget */
+  .chat-widget{position:fixed;right:22px;bottom:22px;width:360px;background:linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.35));border-radius:12px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6);z-index:60;display:none}
+  .chat-header{padding:10px;background:linear-gradient(90deg, rgba(155,107,255,0.06), rgba(255,77,182,0.04));display:flex;justify-content:space-between;align-items:center}
+  .messages{height:240px;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+  .msg{padding:8px 10px;border-radius:10px;max-width:80%;font-size:14px}
+  .msg.me{background:linear-gradient(90deg, rgba(155,107,255,0.12), rgba(255,77,182,0.06));align-self:flex-end}
+  .msg.them{background:rgba(255,255,255,0.03);align-self:flex-start}
+  .chat-input{display:flex;padding:8px;border-top:1px solid rgba(255,255,255,0.03);gap:8px}
+  .chat-input input{flex:1;padding:10px;border-radius:999px;border:0;background:rgba(255,255,255,0.03);color:#fff}
+
+  /* sign up / login buttons */
+  .auth-buttons{display:flex;gap:10px;align-items:center}
+  .auth-buttons .signup{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:999px;color:#fff;font-weight:700}
+  .auth-buttons .login{background:linear-gradient(90deg,var(--accent1),var(--accent2));padding:8px 12px;border-radius:999px;color:#120518;font-weight:800;box-shadow:var(--wordmark-glow)}
+
+  /* footer */
+  footer{padding:22px;text-align:center;color:rgba(255,255,255,0.45);margin-top:40px}
+
+  /* responsive */
+  @media (max-width:920px){
+    main{padding:100px 18px 60px 18px;flex-direction:column}
+    .right{width:100%}
+    .big-live{display:none}
+    .topnav{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="animated-bg" aria-hidden="true"></div>
+
+  <header role="banner">
+    <div class="brand" role="navigation" aria-label="FanFoyer">
+      <div class="logo-ff" aria-hidden="true">FF</div>
+      <div>
+        <div class="wordmark">FanFoyer</div>
+        <div class="subtitle">Live-first spaces for creators & fans</div>
+      </div>
+
+      <nav class="topnav" role="navigation" aria-label="Main navigation">
+        <div class="nav-item active" data-key="home"><span class="icon">🏠</span><span class="label">Home</span></div>
+        <div class="nav-item" data-key="discover"><span class="icon">🔍</span><span class="label">Discover</span></div>
+        <div class="nav-item" data-key="live"><span class="icon">🎥</span><span class="label">Live</span></div>
+        <div class="nav-item" data-key="chat"><span class="icon">💬</span><span class="label">Chat</span></div>
+        <div class="nav-item" data-key="profile"><span class="icon">👤</span><span class="label">Profile</span></div>
+      </nav>
+    </div>
+
+    <div class="controls">
+      <div class="auth-buttons">
+        <button class="signup" id="signupBtn">Sign Up</button>
+        <button class="login" id="loginBtn">Log In</button>
+      </div>
+      <button class="btn ghost" id="toggleRole">Creator Mode</button>
+      <button class="btn primary" id="goLiveBtn">Go Live</button>
+    </div>
+  </header>
+
+  <main role="main">
+    <div class="content">
+      <section class="hero-banner" id="hero">
+        <div class="hero-info">
+          <h1>Discover live creators — jump into the moment</h1>
+          <p>FanFoyer brings creators and fans together in live rooms, short clips, and interactive fan experiences.</p>
+          <div class="hero-cta">
+            <button class="btn primary" id="exploreBtn">Explore Live Rooms</button>
+            <button class="btn ghost" id="howItWorks">How it works</button>
+          </div>
+          <div class="creators-strip" id="creatorsStrip" aria-label="Live creators"></div>
+        </div>
+
+        <div class="big-live" id="featuredLive">
+          <div class="live-badge">LIVE</div>
+          <div class="title">Nisha — Dance Drop</div>
+          <div class="meta">330 viewers • 2m ago</div>
+          <div style="margin-top:12px"><button class="btn primary" id="joinFeatured">Join Now</button></div>
+        </div>
+      </section>
+
+      <h2 style="margin:6px 0 0 4px">Trending Now</h2>
+      <section class="grid" id="roomsGrid" aria-label="Trending rooms"></section>
+    </div>
+
+    <aside class="right" aria-label="Sidebar">
+      <div class="panel" id="creatorPanel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:800">Creator Tools</div>
+          <div class="small">Mode: <span id="modeLabel">Fan</span></div>
+        </div>
+        <div style="margin-top:8px" class="small">Quick actions</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn ghost" id="manageRooms">My Rooms</button>
+          <button class="btn ghost" id="viewEarnings">Earnings</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div style="font-weight:800">Top Fans</div>
+        <div class="small" style="margin-top:8px">Active supporters this hour</div>
+        <div style="margin-top:10px">
+          <div class="stat"><div>Rhea ⭐️</div><div class="small">2 gifts</div></div>
+          <div class="stat"><div>Aman 🎯</div><div class="small">1 gift</div></div>
+          <div class="stat"><div>Jai 💜</div><div class="small">1 gift</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div style="font-weight:800">My Live Room</div>
+        <div class="small" style="margin-top:8px">Status: <strong id="roomStatus">Offline</strong></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn ghost" id="startRoomBtn">Start Room</button>
+          <button class="btn ghost" id="stopRoomBtn" disabled>Stop</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div style="font-weight:800">Quick Chat</div>
+        <div style="margin-top:8px" class="small">Open a mini chat to interact with fans</div>
+        <div style="margin-top:10px">
+          <button class="btn primary" id="openChatBtn">Open Chat</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div id="chatWidget" class="chat-widget" role="dialog" aria-hidden="true">
+    <div class="chat-header"><div style="font-weight:800">Fan Room — Live</div><div><button class="btn ghost" id="closeChat">X</button></div></div>
+    <div class="messages" id="messages">
+      <div class="msg them">Welcome to the live room 🎉</div>
+      <div class="msg me">Hi! excited to be here 🙌</div>
+    </div>
+    <div class="chat-input">
+      <input id="chatInput" placeholder="Type a message..." />
+      <button class="btn primary" id="sendMsg">Send</button>
+    </div>
+    <div style="padding:8px 12px;font-size:12px;color:rgba(255,255,255,0.5);border-top:1px solid rgba(255,255,255,0.03)">Powered by FanFoyer</div>
+  </div>
+
+  <footer>© 2025 FanFoyer — Demo. All rights reserved.</footer>
+
+<script>
+  // demo data
+  const creators = [
+    {id:1,name:'Nisha',emoji:'💃',viewers:330,live:true,room:'Dance Drop'},
+    {id:2,name:'Asha',emoji:'🎤',viewers:128,live:true,room:'Acoustic Q&A'},
+    {id:3,name:'Ravi',emoji:'🎸',viewers:58,live:true,room:'Guitar Riffs'},
+    {id:4,name:'Maya',emoji:'🎨',viewers:86,live:true,room:'Speedpaint'},
+    {id:5,name:'Karan',emoji:'🎮',viewers:12,live:false,room:'Gaming Chill'},
+    {id:6,name:'Sana',emoji:'🎧',viewers:45,live:true,room:'Beat Session'},
+  ];
+  const rooms = [
+    {id:201,title:'Dance Drop',creator:'Nisha',live:true,views:330,thumbnail:'',desc:'High-energy dance set'},
+    {id:202,title:'Acoustic Q&A',creator:'Asha',live:true,views:128,thumbnail:'',desc:'Songs + chat'},
+    {id:203,title:'Guitar Riffs',creator:'Ravi',live:false,views:58,thumbnail:'',desc:'Short guitar clip'},
+    {id:204,title:'Speedpaint',creator:'Maya',live:true,views:86,thumbnail:'',desc:'Watch a painting come alive'},
+    {id:205,title:'Gaming Chill',creator:'Karan',live:false,views:12,thumbnail:'',desc:'Casual game stream'},
+    {id:206,title:'Beat Session',creator:'Sana',live:true,views:45,thumbnail:'',desc:'Live beat-making'},
+  ];
+
+  // populate creators strip
+  const strip = document.getElementById('creatorsStrip');
+  creators.forEach(c=>{
+    const el = document.createElement('div');
+    el.className='creator-card';
+    el.innerHTML = `<div class="creator-top"><div class="creator-avatar">${c.emoji}</div><div style="flex:1"><div class="creator-name">${c.name}</div><div class="small">${c.room}</div></div></div><div class="viewer-count">${c.viewers} viewers</div>`;
+    el.onclick = ()=> joinRoom(c);
+    strip.appendChild(el);
+  });
+
+  // populate rooms grid
+  const grid = document.getElementById('roomsGrid');
+  function renderGrid(){
+    grid.innerHTML='';
+    rooms.forEach(r=>{
+      const node = document.createElement('div');
+      node.className='room';
+      node.innerHTML = `<div class="thumb">${r.title} — ${r.creator}</div><div class="info"><div style="font-weight:800">${r.creator}</div><div class="small">${r.views} viewers</div></div>`;
+      if(r.live){
+        const lt = document.createElement('div'); lt.className='live-tag'; lt.textContent='LIVE'; node.appendChild(lt);
+      }
+      node.onclick = ()=> joinRoom({name:r.creator,emoji:'🎬',live:r.live,room:r.title});
+      grid.appendChild(node);
+    });
+  }
+  renderGrid();
+
+  // nav behavior
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.addEventListener('click', ()=>{
+      document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+      n.classList.add('active');
+      const key = n.getAttribute('data-key');
+      if(key==='home'){ window.scrollTo({top:0,behavior:'smooth'}); }
+      if(key==='discover'){ alert('Discover — demo placeholder'); }
+      if(key==='live'){ document.querySelector('.hero-banner').scrollIntoView({behavior:'smooth'}); }
+      if(key==='chat'){ document.getElementById('openChatBtn').click(); }
+      if(key==='profile'){ alert('Profile — demo placeholder'); }
+    });
+  });
+
+  // chat widget behavior
+  const chatWidget = document.getElementById('chatWidget');
+  document.getElementById('openChatBtn').onclick = ()=> {
+    chatWidget.style.display='block';
+    chatWidget.setAttribute('aria-hidden','false');
+  };
+  document.getElementById('closeChat').onclick = ()=> {
+    chatWidget.style.display='none';
+    chatWidget.setAttribute('aria-hidden','true');
+  };
+  document.getElementById('sendMsg').onclick = sendMessage;
+  document.getElementById('chatInput').addEventListener('keydown', function(e){
+    if(e.key==='Enter') sendMessage();
+  });
+  function sendMessage(){
+    const input = document.getElementById('chatInput');
+    if(!input.value) return;
+    const m = document.createElement('div');
+    m.className='msg me';
+    m.textContent = input.value;
+    document.getElementById('messages').appendChild(m);
+    input.value='';
+    const msgs = document.getElementById('messages'); msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  // join room simulation
+  function joinRoom(creator){
+    chatWidget.style.display='block';
+    chatWidget.setAttribute('aria-hidden','false');
+    const msgs = document.getElementById('messages');
+    const joinMsg = document.createElement('div');
+    joinMsg.className='msg them';
+    joinMsg.textContent = `You joined ${creator.name}'s room — ${creator.room || ''} 🎉`;
+    msgs.appendChild(joinMsg);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  // featured join
+  document.getElementById('joinFeatured').onclick = ()=> joinRoom({name:'Nisha',emoji:'💃',room:'Dance Drop',live:true});
+
+  // explore scroll
+  document.getElementById('exploreBtn').onclick = ()=> {
+    document.querySelector('.grid').scrollIntoView({behavior:'smooth'});
+  };
+
+  // go live / role toggle (demo)
+  document.getElementById('goLiveBtn').onclick = ()=> {
+    alert('Demo: This would open streaming tools to go live.');
+    document.getElementById('toggleRole').textContent='Creator Mode';
+  };
+
+  // start/stop room simulation
+  document.getElementById('startRoomBtn').onclick = ()=> {
+    document.getElementById('roomStatus').textContent='Live';
+    document.getElementById('startRoomBtn').disabled=true;
+    document.getElementById('stopRoomBtn').disabled=false;
+    rooms.unshift({id:999,title:'Your Live Room',creator:'You',live:true,views:1,desc:'Live now'});
+    renderGrid();
+    joinRoom({name:'You',room:'Your Live Room'});
+  };
+  document.getElementById('stopRoomBtn').onclick = ()=> {
+    document.getElementById('roomStatus').textContent='Offline';
+    document.getElementById('startRoomBtn').disabled=false;
+    document.getElementById('stopRoomBtn').disabled=true;
+    const idx = rooms.findIndex(r=>r.creator==='You');
+    if(idx>-1) rooms.splice(idx,1);
+    renderGrid();
+  };
+
+  // auth buttons demo
+  document.getElementById('signupBtn').onclick = ()=> alert('Sign Up demo — registration flow placeholder');
+  document.getElementById('loginBtn').onclick = ()=> alert('Log In demo — auth flow placeholder');
+
+  // small responsive tweak: hide top nav labels on narrow screens
+  function adjustNav(){
+    if(window.innerWidth < 720){
+      document.querySelectorAll('.nav-item .label').forEach(l=>l.style.display='none');
+    } else {
+      document.querySelectorAll('.nav-item .label').forEach(l=>l.style.display='inline');
+    }
+  }
+  window.addEventListener('resize', adjustNav);
+  adjustNav();
+
+</script>
+</body>
+</html>
